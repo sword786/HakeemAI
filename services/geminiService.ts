@@ -1,8 +1,6 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { GeminiVerseSuggestion } from "../types";
-
-// Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const SYSTEM_INSTRUCTION = `
 You are Hakeem AI, a spiritual guide using the Quran.
@@ -22,20 +20,20 @@ Return valid JSON only.
 // Helper to clean JSON string if it contains Markdown formatting
 const cleanJsonString = (text: string): string => {
   if (!text) return "[]";
-  // Remove markdown code blocks like ```json ... ``` or just ``` ... ```
   let cleaned = text.replace(/```json/g, "").replace(/```/g, "");
   return cleaned.trim();
 };
 
 export const getContextualVerses = async (userQuery: string): Promise<GeminiVerseSuggestion[]> => {
+  // Always initialize a new GoogleGenAI instance before use to ensure the correct environment variables are captured.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: userQuery,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
-        // Enable thinking for better contextual matching (approx 2k tokens)
-        thinkingConfig: { thinkingBudget: 2048 },
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.ARRAY,
@@ -65,9 +63,12 @@ export const getContextualVerses = async (userQuery: string): Promise<GeminiVers
 };
 
 export const getDailyAyahSuggestion = async (): Promise<GeminiVerseSuggestion | null> => {
+  // Always initialize a new GoogleGenAI instance before use to ensure the correct environment variables are captured.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: "Give me one verse for today's reflection.",
       config: {
         systemInstruction: DAILY_AYAH_INSTRUCTION,
